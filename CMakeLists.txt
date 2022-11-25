@@ -16,7 +16,6 @@ project(ordered_map CXX)
 # -----------------------------------------------------------------------------
 # Add options.
 # -----------------------------------------------------------------------------
-option(STRICT_TYPE_CHECK "Enable strict ordered_map type checking at runtime" OFF)
 option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
@@ -34,6 +33,8 @@ target_include_directories(ordered_map INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # -----------------------------------------------------------------------------
 # Set the compilation flags.
 # -----------------------------------------------------------------------------
+target_compile_options(ordered_map INTERFACE -std=c++98)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
     target_compile_definitions(ordered_map INTERFACE _CRT_SECURE_NO_WARNINGS)
