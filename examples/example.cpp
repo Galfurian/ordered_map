@@ -1,85 +1,52 @@
-#include "ordered_map/ordered_map.hpp"
-
 #include <iostream>
 #include <sstream>
 
+#include "ordered_map/ordered_map.hpp"
+
 typedef ordered_map::ordered_map_t<std::string, int> Table;
 
-inline void print_at(const Table &table, std::size_t i)
+inline void print(const Table &table)
 {
-    Table::const_iterator it;
-    if ((it = table.at(i)) != table.end())
-        std::cout << it->second << ", ";
+    std::cout << "{ ";
+    for (Table::const_iterator it = table.begin(); it != table.end(); ++it)
+        std::cout << "[" << it->first << "](" << it->second << ") ";
+    std::cout << "}\n";
 }
 
-inline void print_with_key(const Table &table, const std::string &key)
+bool compare(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
 {
-    Table::const_iterator it;
-    if ((it = table.find(key)) != table.end())
-        std::cout << it->second << ", ";
+    return lhs.first > rhs.first;
 }
-
-class Foo {
-public:
-    Table table;
-};
 
 int main(int, char *[])
 {
     Table table;
 
+    // Setting values.
     table.set("a", 1);
     table.set("b", 2);
     table.set("c", 3);
+    print(table);
 
-    std::cout << "\n";
-    print_with_key(table, "a");
-    print_with_key(table, "b");
-    print_with_key(table, "c");
-    std::cout << "\n";
-    for (std::size_t i = 0; i < 10; ++i)
-        print_at(table, i);
-    std::cout << "\n";
+    // Change one value.
+    table.set("c", 4);
+    print(table);
 
-    Table table2 = table;
+    // Change one value and remove a key.
+    table.set("d", 5);
+    table.erase("c");
+    print(table);
 
-    table2.set("c", 4);
-
-    std::cout << "\n";
-    print_with_key(table2, "a");
-    print_with_key(table2, "b");
-    print_with_key(table2, "c");
-    std::cout << "\n";
-    for (std::size_t i = 0; i < 10; ++i)
-        print_at(table2, i);
-    std::cout << "\n";
-
-    table2.set("d", 5);
-    table2.erase("c");
-
-    std::cout << "\n";
-    print_with_key(table2, "a");
-    print_with_key(table2, "b");
-    print_with_key(table2, "c");
-    print_with_key(table2, "d");
-    std::cout << "\n";
-    for (std::size_t i = 0; i < 10; ++i)
-        print_at(table2, i);
-    std::cout << "\n";
-
+    // Erase using iterator.
     Table::iterator it_erase;
-    if ((it_erase = table2.find("d")) != table2.end())
-        table2.erase(it_erase);
+    if ((it_erase = table.find("d")) != table.end())
+        table.erase(it_erase);
+    print(table);
 
-    std::cout << "\n";
-    print_with_key(table2, "a");
-    print_with_key(table2, "b");
-    print_with_key(table2, "c");
-    print_with_key(table2, "d");
-    std::cout << "\n";
-    for (std::size_t i = 0; i < 10; ++i)
-        print_at(table2, i);
-    std::cout << "\n";
+    // Sort the value but preserve the internal mechanisms, i.e., the key value
+    // association.
+    table.sort(compare);
+    print(table);
 
     return 0;
 }
