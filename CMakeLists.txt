@@ -91,3 +91,9 @@ endif()
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+# -----------------------------------------------------------------------------
+# Testing programs.
+# -----------------------------------------------------------------------------
+enable_testing()
+add_subdirectory(tests)
