@@ -13,9 +13,14 @@ inline void print(const Table &table)
     std::cout << "}\n";
 }
 
-bool compare(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
+bool compare_gt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
 {
     return lhs.first > rhs.first;
+}
+
+bool compare_lt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
+{
+    return lhs.first < rhs.first;
 }
 
 int main(int, char *[])
@@ -45,7 +50,9 @@ int main(int, char *[])
 
     // Sort the value but preserve the internal mechanisms, i.e., the key value
     // association.
-    table.sort(compare);
+    table.sort(compare_gt);
+    print(table);
+    table.sort(compare_lt);
     print(table);
 
     return 0;

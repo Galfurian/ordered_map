@@ -47,8 +47,12 @@ public:
           table()
     {
         for (const_iterator it = other.list.begin(); it != other.list.end(); ++it) {
-            list.push_back(std::make_pair(it->first, it->second));
-            table.insert(std::make_pair(it->first, --(list.end())));
+            table.insert(
+                std::make_pair(
+                    it->first,
+                    list.insert(
+                        list.end(),
+                        std::make_pair(it->first, it->second))));
         }
     }
 
@@ -77,10 +81,9 @@ public:
         iterator it_list;
         // Now, if the element is not in the table, we need to add it.
         if (it_table == table.end()) {
-            // First, we add the element to the list.
-            list.push_back(std::make_pair(key, value));
-            // Then, we get the pointer to the newly inserted element.
-            it_list = --(list.end());
+            // First, we add the element to the list and get the pointer to the
+            // newly inserted element.
+            it_list = list.insert(list.end(), std::make_pair(key, value));
             // Finally, we store inside the map the `<key, iteartor>` pair to
             // easily access the element inside the list.
             table.insert(std::make_pair(key, it_list));
@@ -207,8 +210,12 @@ public:
     {
         this->clear();
         for (const_iterator it = other.list.begin(); it != other.list.end(); ++it) {
-            list.push_back(std::make_pair(it->first, it->second));
-            table.insert(std::make_pair(it->first, --(list.end())));
+            table.insert(
+                std::make_pair(
+                    it->first,
+                    list.insert(
+                        list.end(),
+                        std::make_pair(it->first, it->second))));
         }
         return *this;
     }
