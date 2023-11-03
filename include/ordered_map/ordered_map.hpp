@@ -1,11 +1,11 @@
 /// @file ordered_map.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
-/// @brief
+/// @brief The ordered map class.
 
 #pragma once
 
-#include <map>
 #include <list>
+#include <map>
 
 /// @brief This namespace contains the main table class.
 namespace ordered_map
@@ -127,8 +127,9 @@ public:
     iterator erase(const Key &key)
     {
         table_iterator it_table = table.find(key);
-        if (it_table == table.end())
+        if (it_table == table.end()) {
             return list.end();
+        }
         iterator it_list = it_table->second;
         ++it_list;
         list.erase(it_table->second);
@@ -143,8 +144,9 @@ public:
     iterator erase(iterator it_list)
     {
         table_iterator it_table = table.find(it_list->first);
-        if (it_table == table.end())
+        if (it_table == table.end()) {
             return list.end();
+        }
         ++it_list;
         list.erase(it_table->second);
         table.erase(it_table);
@@ -177,8 +179,9 @@ public:
     iterator find(const Key &key)
     {
         table_iterator it = table.find(key);
-        if (it == table.end())
+        if (it == table.end()) {
             return list.end();
+        }
         return it->second;
     }
 
@@ -188,8 +191,9 @@ public:
     const_iterator find(const Key &key) const
     {
         table_const_iterator it = table.find(key);
-        if (it == table.end())
+        if (it == table.end()) {
             return list.end();
+        }
         return it->second;
     }
 
