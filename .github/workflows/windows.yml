@@ -23,7 +23,7 @@ jobs:
               uses: actions/checkout@v2
             - name: Build
               run: |
-                  cmake -B build -DORDERED_MAP_BUILD_TESTS=ON -DORDERED_MAP_WARNINGS_AS_ERRORS=ON
+                  cmake -B build -Dordered_map_BUILD_TESTS=ON -Dordered_map_WARNINGS_AS_ERRORS=ON
                   cmake --build build --parallel 2
             - name: Test
               run: ctest -C Debug --test-dir build --no-tests=error --verbose
