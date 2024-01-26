@@ -1,3 +1,11 @@
+/// @file test.cpp
+/// @author Enrico Fraccaroli (enry.frak@gmail.com)
+/// @brief Simple test set for the ordered map.
+/// 
+/// @copyright (c) 2024 This file is distributed under the MIT License.
+/// See LICENSE.md for details.
+/// 
+
 #include <iostream>
 #include <sstream>
 #include <string>

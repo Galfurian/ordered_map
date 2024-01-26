@@ -61,11 +61,9 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/inclu
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
     target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
-    
     if(WARNINGS_AS_ERRORS)
         target_compile_options(${PROJECT_NAME} INTERFACE /WX)
     endif()
-
     if(STRICT_WARNINGS)
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
@@ -73,20 +71,15 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
         target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
         target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
-
         target_compile_options(${PROJECT_NAME} INTERFACE /W4)
     endif()
-
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    
     if(WARNINGS_AS_ERRORS)
         target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
     endif()
-    
     if(STRICT_WARNINGS)
         target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
     endif()
-
 endif()
 
 # -----------------------------------------------------------------------------
@@ -94,12 +87,10 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(BUILD_EXAMPLES)
-
     # Add the example.
     add_executable(${PROJECT_NAME}_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
     # Set the linked libraries.
     target_link_libraries(${PROJECT_NAME}_example PUBLIC ${PROJECT_NAME})
-    
 endif()
 
 # -----------------------------------------------------------------------------
@@ -107,10 +98,8 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(BUILD_TESTS)
-
     # CMake has support for adding tests to a project.
     enable_testing()
-
     # Add the test.
     add_executable(${PROJECT_NAME}_test ${PROJECT_SOURCE_DIR}/tests/test.cpp)
     add_test(NAME ${PROJECT_NAME}_test_run_0 COMMAND ${PROJECT_NAME}_test 0)
@@ -120,7 +109,6 @@ if(BUILD_TESTS)
     add_test(NAME ${PROJECT_NAME}_test_run_4 COMMAND ${PROJECT_NAME}_test 4)
     # Liking for the test.
     target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
-
 endif()
 
 # -----------------------------------------------------------------------------
@@ -128,7 +116,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(DOXYGEN_FOUND)
-    
+    # = FETCH DOXYGEN-AWESOME =================================================
     # Record the options that describe how to populate the specified content.
     FetchContent_Declare(doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
@@ -141,7 +129,6 @@ if(DOXYGEN_FOUND)
         FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME
         FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
     )
-
     # = CUSTOMIZATION =========================================================
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
     set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
