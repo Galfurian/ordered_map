@@ -16,6 +16,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # -----------------------------------------------------------------------------
+# OPTIONS
+# -----------------------------------------------------------------------------
+
+option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
+option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+
+# -----------------------------------------------------------------------------
 # ENABLE FETCH CONTENT
 # -----------------------------------------------------------------------------
 
@@ -28,15 +37,6 @@ mark_as_advanced(FORCE
     FETCHCONTENT_FULLY_DISCONNECTED
     FETCHCONTENT_UPDATES_DISCONNECTED
 )
-
-# -----------------------------------------------------------------------------
-# OPTIONS
-# -----------------------------------------------------------------------------
-
-option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
-option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
-option(BUILD_EXAMPLES "Build examples" OFF)
-option(BUILD_TESTS "Build tests" OFF)
 
 # -----------------------------------------------------------------------------
 # DEPENDENCY (SYSTEM LIBRARIES)
@@ -54,24 +54,19 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Include header directories, and link libraries.
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
-# -----------------------------------------------------------------------------
+# =====================================
 # COMPILATION FLAGS
-# -----------------------------------------------------------------------------
+# =====================================
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
     target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
+    
     if(WARNINGS_AS_ERRORS)
         target_compile_options(${PROJECT_NAME} INTERFACE /WX)
     endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
-    endif()
-endif()
 
-if(STRICT_WARNINGS)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(STRICT_WARNINGS)
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
         target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
@@ -80,9 +75,18 @@ if(STRICT_WARNINGS)
         target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
 
         target_compile_options(${PROJECT_NAME} INTERFACE /W4)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    endif()
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    
+    if(WARNINGS_AS_ERRORS)
+        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
+    endif()
+    
+    if(STRICT_WARNINGS)
         target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
     endif()
+
 endif()
 
 # -----------------------------------------------------------------------------
@@ -109,15 +113,13 @@ if(BUILD_TESTS)
 
     # Add the test.
     add_executable(${PROJECT_NAME}_test ${PROJECT_SOURCE_DIR}/tests/test.cpp)
-    # Liking for the test.
-    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
-
-    # Add the tests.
     add_test(NAME ${PROJECT_NAME}_test_run_0 COMMAND ${PROJECT_NAME}_test 0)
     add_test(NAME ${PROJECT_NAME}_test_run_1 COMMAND ${PROJECT_NAME}_test 1)
     add_test(NAME ${PROJECT_NAME}_test_run_2 COMMAND ${PROJECT_NAME}_test 2)
     add_test(NAME ${PROJECT_NAME}_test_run_3 COMMAND ${PROJECT_NAME}_test 3)
     add_test(NAME ${PROJECT_NAME}_test_run_4 COMMAND ${PROJECT_NAME}_test 4)
+    # Liking for the test.
+    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 endif()
 
@@ -128,24 +130,17 @@ endif()
 if(DOXYGEN_FOUND)
     
     # Record the options that describe how to populate the specified content.
-    FetchContent_Declare(
-        doxygenawesome
+    FetchContent_Declare(doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
-        GIT_TAG 4cd62308d825fe0396d2f66ffbab45d0e247724c # 2.0.3
+        GIT_TAG df88fe4fdd97714fadfd3ef17de0b4401f804052
     )
     # Retrieve the properties related to the content.
-    FetchContent_GetProperties(doxygenawesome)
-    # If not populated, make the content available.
-    if(NOT doxygenawesome_POPULATED)
-        message(STATUS "Retrieving `doxygen-awesome-css`...")
-        # Ensures the named dependencies have been populated.
-        FetchContent_MakeAvailable(doxygenawesome)
-        # Hide fetchcontent variables, otherwise with ccmake it's a mess.
-        mark_as_advanced(FORCE
-            FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME
-            FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
-        )
-    endif()
+    FetchContent_MakeAvailable(doxygenawesome)
+    # Hide fetchcontent variables, otherwise with ccmake it's a mess.
+    mark_as_advanced(FORCE
+        FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME
+        FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
+    )
 
     # = CUSTOMIZATION =========================================================
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
