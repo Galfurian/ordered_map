@@ -1,13 +1,14 @@
 /// @file test.cpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief Simple test set for the ordered map.
-/// 
+///
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-/// 
+///
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include <string>
 
 #include "ordered_map/ordered_map.hpp"
@@ -23,7 +24,17 @@ inline int get_choice(char *argument)
     return choice;
 }
 
-inline bool check(const Table &table, const std::string &key, int value)
+inline bool exists(const Table &table, const std::string &key)
+{
+    return table.find(key) != table.end();
+}
+
+inline bool exists(const Table &table, std::size_t position)
+{
+    return table.at(position) != table.end();
+}
+
+inline bool check_key(const Table &table, const std::string &key, int value)
 {
     Table::const_iterator it = table.find(key);
     if (it == table.end()) {
@@ -32,13 +43,43 @@ inline bool check(const Table &table, const std::string &key, int value)
     return it->second == value;
 }
 
-inline bool check(const Table &table, std::size_t position, int value)
+inline bool check_position(const Table &table, std::size_t position, int value)
 {
     Table::const_iterator it = table.at(position);
     if (it == table.end()) {
         return false;
     }
     return it->second == value;
+}
+
+inline bool check_keys(const Table &table,
+                       const std::vector<std::string> &keys,
+                       const std::vector<int> &values)
+{
+    if (keys.size() != values.size()) {
+        throw std::runtime_error("Keys and values have different size.");
+    }
+    for (std::size_t i = 0; i < keys.size(); ++i) {
+        if (!check_key(table, keys[i], values[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool check_positions(const Table &table,
+                            const std::vector<std::size_t> &positions,
+                            const std::vector<int> &values)
+{
+    if (positions.size() != values.size()) {
+        throw std::runtime_error("Positions and values have different size.");
+    }
+    for (std::size_t i = 0; i < positions.size(); ++i) {
+        if (!check_position(table, positions[i], values[i])) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool compare(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
@@ -59,11 +100,11 @@ int run_test_0()
         std::cerr << "Table size is wrong.\n";
         return 1;
     }
-    if (!check(table, "a", 1) || !check(table, "b", 2) || !check(table, "c", 3)) {
+    if (!check_keys(table, { "a", "b", "c" }, { 1, 2, 3 })) {
         std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    if (!check(table, 0, 1) || !check(table, 1, 2) || !check(table, 2, 3)) {
+    if (!check_positions(table, { 0, 1, 2 }, { 1, 2, 3 })) {
         std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }
@@ -85,11 +126,11 @@ int run_test_1()
         std::cerr << "Table size is wrong.\n";
         return 1;
     }
-    if (!check(table, "a", 1) || !check(table, "b", 2) || !check(table, "c", 5)) {
+    if (!check_keys(table, { "a", "b", "c" }, { 1, 2, 5 })) {
         std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    if (!check(table, 0, 1) || !check(table, 1, 2) || !check(table, 2, 5)) {
+    if (!check_positions(table, { 0, 1, 2 }, { 1, 2, 5 })) {
         std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }
@@ -111,12 +152,12 @@ int run_test_2()
         std::cerr << "Table size is wrong.\n";
         return 1;
     }
-    if (!check(table, "a", 1) || !check(table, "b", 2) || check(table, "c", 3)) {
+    if (!check_keys(table, { "a", "b" }, { 1, 2 }) || exists(table, "c")) {
         std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    if (!check(table, 0, 1) || !check(table, 1, 2) || check(table, 2, 3)) {
-        std::cerr << "The position->value association is wrong.\n";
+    if (!check_positions(table, { 0, 1 }, { 1, 2 }) || exists(table, 2)) {
+        std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }
     return 0;
@@ -138,12 +179,12 @@ int run_test_3()
         std::cerr << "Table size is wrong.\n";
         return 1;
     }
-    if (!check(table, "a", 1) || !check(table, "b", 2) || check(table, "c", 3) || !check(table, "d", 7)) {
+    if (!check_keys(table, { "a", "b", "d" }, { 1, 2, 7 }) || exists(table, "c")) {
         std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    if (!check(table, 0, 1) || !check(table, 1, 2) || check(table, 2, 3) || !check(table, 2, 7)) {
-        std::cerr << "The position->value association is wrong.\n";
+    if (!check_positions(table, { 0, 1, 2 }, { 1, 2, 7 }) || check_position(table, 2, 3)) {
+        std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }
     return 0;
@@ -163,24 +204,22 @@ int run_test_4()
         return 1;
     }
     // Run the basic checks.
-    if (!check(table, "a", 3) || !check(table, "b", 2) || !check(table, "c", 1)) {
+    if (!check_keys(table, { "a", "b", "c" }, { 3, 2, 1 })) {
         std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    // Run the index-based test.
-    if (!check(table, 0, 1) || !check(table, 1, 2) || !check(table, 2, 3)) {
-        std::cerr << "The position->value association is wrong.\n";
+    if (!check_positions(table, { 0, 1, 2 }, { 1, 2, 3 })) {
+        std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }
     // Sort the table.
     table.sort(compare);
     // Run the basic checks again, the key-value association should stay the same.
-    if (!check(table, "a", 3) || !check(table, "b", 2) || !check(table, "c", 1)) {
-        std::cerr << "The key->value association is wrong (after sort).\n";
+    if (!check_keys(table, { "a", "b", "c" }, { 3, 2, 1 })) {
+        std::cerr << "The key->value association is wrong.\n";
         return 1;
     }
-    // Run again the index-based test, which should find the values swapped.
-    if (!check(table, 0, 3) || !check(table, 1, 2) || !check(table, 2, 1)) {
+    if (!check_positions(table, { 0, 1, 2 }, { 3, 2, 1 })) {
         std::cerr << "The position->value association is wrong (after sort).\n";
         return 1;
     }

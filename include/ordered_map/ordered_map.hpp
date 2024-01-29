@@ -1,10 +1,10 @@
 /// @file ordered_map.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief The ordered map class.
-/// 
+///
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-/// 
+///
 
 #pragma once
 
@@ -21,13 +21,13 @@ namespace ordered_map
 template <typename Key, typename Value>
 class ordered_map_t {
 public:
-    /// @brief The  storage.
+    /// @brief This stores the key->value association.
     typedef std::pair<Key, Value> list_entry_t;
-    /// @brief The value storage.
+    /// @brief The actual storage.
     typedef std::list<list_entry_t> list_t;
-    /// @brief Iteartor for the list.
+    /// @brief Iterator for the list, for the user.
     typedef typename list_t::iterator iterator;
-    /// @brief Constant iteartor for the list.
+    /// @brief Constant iterator for the list, for the user.
     typedef typename list_t::const_iterator const_iterator;
     /// @brief The type of a compatible sort function.
     typedef bool (*sort_function_t)(const list_entry_t &, const list_entry_t &);
@@ -208,7 +208,7 @@ public:
         list.sort(fun);
     }
 
-    /// @brief Copy constructor.
+    /// @brief Assign operator.
     /// @param other a reference to the map to copy.
     /// @details I had to define one, otherwise copying this map will screw up
     /// the copy of the iterators contained inside the `std::map`. That is why,
