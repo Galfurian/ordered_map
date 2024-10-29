@@ -120,7 +120,7 @@ if(DOXYGEN_FOUND)
     # Record the options that describe how to populate the specified content.
     FetchContent_Declare(doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
-        GIT_TAG df88fe4fdd97714fadfd3ef17de0b4401f804052
+        GIT_TAG main
     )
     # Retrieve the properties related to the content.
     FetchContent_MakeAvailable(doxygenawesome)
