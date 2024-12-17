@@ -49,10 +49,10 @@ find_package(Doxygen)
 # -----------------------------------------------------------------------------
 
 # Add the C++ Library.
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(ordered_map INTERFACE)
+add_library(ordered_map::ordered_map ALIAS ordered_map)
 # Include header directories, and link libraries.
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(ordered_map INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 # =====================================
 # COMPILATION FLAGS
@@ -60,25 +60,25 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/inclu
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
-    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(ordered_map INTERFACE _CRT_SECURE_NO_WARNINGS)
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
+        target_compile_options(ordered_map INTERFACE /WX)
     endif()
     if(STRICT_WARNINGS)
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
-        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
-        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
+        target_compile_options(ordered_map INTERFACE /experimental:external)
+        target_compile_options(ordered_map INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(ordered_map INTERFACE /external:anglebrackets)
+        target_compile_options(ordered_map INTERFACE /external:W0)
+        target_compile_options(ordered_map INTERFACE /W4)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
+        target_compile_options(ordered_map INTERFACE -Werror)
     endif()
     if(STRICT_WARNINGS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
+        target_compile_options(ordered_map INTERFACE -Wall -Wextra -Wconversion -pedantic)
     endif()
 endif()
 
@@ -88,9 +88,9 @@ endif()
 
 if(BUILD_EXAMPLES)
     # Add the example.
-    add_executable(${PROJECT_NAME}_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
+    add_executable(ordered_map_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
     # Set the linked libraries.
-    target_link_libraries(${PROJECT_NAME}_example PUBLIC ${PROJECT_NAME})
+    target_link_libraries(ordered_map_example PUBLIC ordered_map)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -101,14 +101,14 @@ if(BUILD_TESTS)
     # CMake has support for adding tests to a project.
     enable_testing()
     # Add the test.
-    add_executable(${PROJECT_NAME}_test ${PROJECT_SOURCE_DIR}/tests/test.cpp)
-    add_test(NAME ${PROJECT_NAME}_test_run_0 COMMAND ${PROJECT_NAME}_test 0)
-    add_test(NAME ${PROJECT_NAME}_test_run_1 COMMAND ${PROJECT_NAME}_test 1)
-    add_test(NAME ${PROJECT_NAME}_test_run_2 COMMAND ${PROJECT_NAME}_test 2)
-    add_test(NAME ${PROJECT_NAME}_test_run_3 COMMAND ${PROJECT_NAME}_test 3)
-    add_test(NAME ${PROJECT_NAME}_test_run_4 COMMAND ${PROJECT_NAME}_test 4)
+    add_executable(ordered_map_test ${PROJECT_SOURCE_DIR}/tests/test.cpp)
+    add_test(NAME ordered_map_test_run_0 COMMAND ordered_map_test 0)
+    add_test(NAME ordered_map_test_run_1 COMMAND ordered_map_test 1)
+    add_test(NAME ordered_map_test_run_2 COMMAND ordered_map_test 2)
+    add_test(NAME ordered_map_test_run_3 COMMAND ordered_map_test 3)
+    add_test(NAME ordered_map_test_run_4 COMMAND ordered_map_test 4)
     # Liking for the test.
-    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+    target_link_libraries(ordered_map_test ordered_map)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -131,7 +131,7 @@ if(DOXYGEN_FOUND)
     )
     # = CUSTOMIZATION =========================================================
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
-    set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+    set(DOXYGEN_PROJECT_NAME ordered_map)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
@@ -143,8 +143,9 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
     doxygen_add_docs(
-        ${PROJECT_NAME}_documentation
+        ordered_map_documentation
         ${PROJECT_SOURCE_DIR}/README.md
+        ${PROJECT_SOURCE_DIR}/LICENSE.md
         ${PROJECT_SOURCE_DIR}/include/ordered_map/ordered_map.hpp
     )
 endif()
