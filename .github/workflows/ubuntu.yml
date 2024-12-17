@@ -1,4 +1,4 @@
-name: Ordered Map CI - Ubuntu
+name: Ubuntu
 
 # Trigger the workflow on push or pull requests for main and develop branches
 on:

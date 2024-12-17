@@ -1,4 +1,4 @@
-name: Ordered Map CI - Windows
+name: Windows
 
 # Trigger the workflow on push or pull requests for main and develop branches
 on:

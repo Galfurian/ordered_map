@@ -1,4 +1,4 @@
-name: Ordered Map CI - Documentation
+name: Documentation
 
 # Trigger the workflow on push or pull requests for main and develop branches
 on:
