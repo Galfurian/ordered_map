@@ -51,29 +51,32 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Step: Set up MinGW for GCC support
+    # Step: Install MinGW for GCC support
     - name: Install MinGW (For GCC Support)
       if: matrix.cc == 'gcc'
+      shell: cmd
       run: |
         choco install mingw -y
-        echo "C:\ProgramData\chocolatey\bin" >> $env:GITHUB_PATH
+        echo C:\ProgramData\chocolatey\bin >> %GITHUB_PATH%
 
     # Step: Configure Project (Use Visual Studio generator for MSVC)
     - name: Configure Project
+      shell: cmd
       run: |
         mkdir build
         cd build
-        if "${{ matrix.cc }}" == "cl" (
+        if "%CC%" == "cl" (
           cmake -G "Visual Studio 17 2022" -A x64 ..
         ) else (
-          cmake -DCMAKE_C_COMPILER=${{ env.CC }} -DCMAKE_CXX_COMPILER=${{ env.CXX }} ..
+          cmake -DCMAKE_C_COMPILER=%CC% -DCMAKE_CXX_COMPILER=%CXX% ..
         )
 
     # Step: Build Project
     - name: Build Project
+      shell: cmd
       run: |
         cd build
-        if "${{ matrix.cc }}" == "cl" (
+        if "%CC%" == "cl" (
           cmake --build . --config Debug --parallel 2
         ) else (
           cmake --build . --parallel 2
@@ -81,6 +84,7 @@ jobs:
 
     # Step: Run Tests
     - name: Run Tests
+      shell: cmd
       run: |
         cd build
         ctest -C Debug --verbose
