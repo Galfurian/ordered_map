@@ -62,7 +62,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_C_COMPILER=${{ env.CC }} -DCMAKE_CXX_COMPILER=${{ env.CXX }} ..
+          cmake -DCMAKE_C_COMPILER=${{ env.CC }} -DCMAKE_CXX_COMPILER=${{ env.CXX }} -DBUILD_TESTS=ON -DWARNINGS_AS_ERRORS=ON ..
 
       - name: Build Project
         run: |
