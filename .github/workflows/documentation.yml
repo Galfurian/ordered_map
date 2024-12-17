@@ -1,34 +1,34 @@
-name: Generate Documentation
+name: Ordered Map CI - Documentation
 
 # Trigger the workflow on push or pull requests for main and develop branches
 on:
-    push:
-      branches:
-      - main
-      - develop
-      paths:
-      - '**/*.c'
-      - '**/*.cpp'
-      - '**/*.h'
-      - '**/*.hpp'
-      - '**/CMakeLists.txt'
-      - '**/Makefile'
-      - '**/cmake/**'
-      - '.github/workflows/**'
-    pull_request:
-      branches:
-      - main
-      - develop
-      paths:
-      - '**/*.c'
-      - '**/*.cpp'
-      - '**/*.h'
-      - '**/*.hpp'
-      - '**/CMakeLists.txt'
-      - '**/Makefile'
-      - '**/cmake/**'
-      - '.github/workflows/**'
-  
+  push:
+    branches:
+    - main
+    - develop
+    paths:
+    - '**/*.c'
+    - '**/*.cpp'
+    - '**/*.h'
+    - '**/*.hpp'
+    - '**/CMakeLists.txt'
+    - '**/Makefile'
+    - '**/cmake/**'
+    - '.github/workflows/documentation.yml'
+  pull_request:
+    branches:
+    - main
+    - develop
+    paths:
+    - '**/*.c'
+    - '**/*.cpp'
+    - '**/*.h'
+    - '**/*.hpp'
+    - '**/CMakeLists.txt'
+    - '**/Makefile'
+    - '**/cmake/**'
+    - '.github/workflows/documentation.yml'
+
 jobs:
   doxygen:
     name: Generate Doxygen Documentation

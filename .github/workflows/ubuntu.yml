@@ -14,7 +14,7 @@ on:
     - '**/CMakeLists.txt'
     - '**/Makefile'
     - '**/cmake/**'
-    - '.github/workflows/**'
+    - '.github/workflows/ubuntu.yml'
   pull_request:
     branches:
     - main
@@ -27,7 +27,7 @@ on:
     - '**/CMakeLists.txt'
     - '**/Makefile'
     - '**/cmake/**'
-    - '.github/workflows/**'
+    - '.github/workflows/ubuntu.yml'
 
 jobs:
   build:

@@ -1,5 +1,6 @@
 name: Ordered Map CI - Windows
 
+# Trigger the workflow on push or pull requests for main and develop branches
 on:
   push:
     branches:
@@ -12,6 +13,8 @@ on:
     - '**/*.hpp'
     - '**/CMakeLists.txt'
     - '**/Makefile'
+    - '**/cmake/**'
+    - '.github/workflows/windows.yml'
   pull_request:
     branches:
     - main
@@ -23,6 +26,8 @@ on:
     - '**/*.hpp'
     - '**/CMakeLists.txt'
     - '**/Makefile'
+    - '**/cmake/**'
+    - '.github/workflows/windows.yml'
 
 jobs:
   build:
