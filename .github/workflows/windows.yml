@@ -1,6 +1,5 @@
 name: Ordered Map CI - Windows
 
-# Trigger the workflow on push or pull requests for main and develop branches
 on:
   push:
     branches:
@@ -13,8 +12,6 @@ on:
     - '**/*.hpp'
     - '**/CMakeLists.txt'
     - '**/Makefile'
-    - '**/cmake/**'
-    - '.github/workflows/**'
   pull_request:
     branches:
     - main
@@ -26,8 +23,6 @@ on:
     - '**/*.hpp'
     - '**/CMakeLists.txt'
     - '**/Makefile'
-    - '**/cmake/**'
-    - '.github/workflows/**'
 
 jobs:
   build:
@@ -49,25 +44,37 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
+    # Step: Set up MinGW for GCC support
     - name: Install MinGW (For GCC Support)
       if: matrix.cc == 'gcc'
       run: |
         choco install mingw -y
         echo "C:\ProgramData\chocolatey\bin" >> $env:GITHUB_PATH
 
+    # Step: Configure Project (Use Visual Studio generator for MSVC)
     - name: Configure Project
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_C_COMPILER=${{ env.CC }} -DCMAKE_CXX_COMPILER=${{ env.CXX }} -G "NMake Makefiles" ..
+        if "${{ matrix.cc }}" == "cl" (
+          cmake -G "Visual Studio 17 2022" -A x64 ..
+        ) else (
+          cmake -DCMAKE_C_COMPILER=${{ env.CC }} -DCMAKE_CXX_COMPILER=${{ env.CXX }} ..
+        )
 
+    # Step: Build Project
     - name: Build Project
       run: |
         cd build
-        cmake --build . --config Debug --parallel 2
+        if "${{ matrix.cc }}" == "cl" (
+          cmake --build . --config Debug --parallel 2
+        ) else (
+          cmake --build . --parallel 2
+        )
 
+    # Step: Run Tests
     - name: Run Tests
       run: |
         cd build
