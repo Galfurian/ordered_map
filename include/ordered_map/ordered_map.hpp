@@ -15,7 +15,7 @@
 enum : std::uint8_t {
     ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
     ORDERED_MAP_MINOR_VERSION = 0, ///< Minor version of the library.
-    ORDERED_MAP_MICRO_VERSION = 3, ///< Micro version of the library.
+    ORDERED_MAP_MICRO_VERSION = 4, ///< Micro version of the library.
 };
 
 /// @brief This namespace contains the main table class.
@@ -97,7 +97,6 @@ public:
 
     /// @brief Returns the number of element in the map.
     /// @return the number of elements.
-    [[nodiscard]]
     auto size() const -> std::size_t
     {
         return list.size();

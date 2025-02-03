@@ -16,6 +16,7 @@ Checks:
 - misc-braces-around-statements
 - -llvm-header-guard
 - -altera-unroll-loops
+- -modernize-use-nodiscard
 
 WarningsAsErrors: ''
 HeaderFileExtensions:
