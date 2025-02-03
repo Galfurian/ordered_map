@@ -15,7 +15,7 @@
 enum : std::uint8_t {
     ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
     ORDERED_MAP_MINOR_VERSION = 0, ///< Minor version of the library.
-    ORDERED_MAP_MICRO_VERSION = 2  ///< Micro version of the library.
+    ORDERED_MAP_MICRO_VERSION = 3, ///< Micro version of the library.
 };
 
 /// @brief This namespace contains the main table class.
