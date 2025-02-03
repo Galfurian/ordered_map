@@ -56,7 +56,7 @@ add_library(ordered_map::ordered_map ALIAS ordered_map)
 # Include header directories, and link libraries.
 target_include_directories(ordered_map INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set the library to use c++-11
-target_compile_features(ordered_map INTERFACE cxx_std_17)
+target_compile_features(ordered_map INTERFACE cxx_std_11)
 
 # =====================================
 # COMPILATION FLAGS

@@ -97,8 +97,7 @@ public:
 
     /// @brief Returns the number of element in the map.
     /// @return the number of elements.
-    [[nodiscard]]
-    auto size() const -> std::size_t
+    [[nodiscard]] auto size() const -> std::size_t
     {
         return list.size();
     }
