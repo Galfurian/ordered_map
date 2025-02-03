@@ -8,8 +8,15 @@
 
 #pragma once
 
+#include <cstdint>
 #include <list>
 #include <map>
+
+enum : std::uint8_t {
+    ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
+    ORDERED_MAP_MINOR_VERSION = 0, ///< Minor version of the library.
+    ORDERED_MAP_MICRO_VERSION = 2  ///< Micro version of the library.
+};
 
 /// @brief This namespace contains the main table class.
 namespace ordered_map
@@ -19,23 +26,24 @@ namespace ordered_map
 /// @tparam Key the type of the key for building the `std::map`.
 /// @tparam Value the value stored inside the `std::list`.
 template <typename Key, typename Value>
-class ordered_map_t {
+class ordered_map_t
+{
 public:
     /// @brief This stores the key->value association.
-    typedef std::pair<Key, Value> list_entry_t;
+    using list_entry_t    = std::pair<Key, Value>;
     /// @brief The actual storage.
-    typedef std::list<list_entry_t> list_t;
+    using list_t          = std::list<list_entry_t>;
     /// @brief Iterator for the list, for the user.
-    typedef typename list_t::iterator iterator;
+    using iterator        = typename list_t::iterator;
     /// @brief Constant iterator for the list, for the user.
-    typedef typename list_t::const_iterator const_iterator;
+    using const_iterator  = typename list_t::const_iterator;
     /// @brief The type of a compatible sort function.
-    typedef bool (*sort_function_t)(const list_entry_t &, const list_entry_t &);
+    using sort_function_t = bool (*)(const list_entry_t &, const list_entry_t &);
 
     /// @brief Construct a new ordered map.
     ordered_map_t()
-        : list(),
-          table()
+        : list()
+        , table()
     {
         // Nothing to do.
     }
@@ -47,18 +55,38 @@ public:
     /// here I copy each individual element of the list and store the iterator,
     /// again.
     ordered_map_t(const ordered_map_t &other)
-        : list(),
-          table()
+        : list()
+        , table()
     {
-        for (const_iterator it = other.list.begin(); it != other.list.end(); ++it) {
-            table.insert(
-                std::make_pair(
-                    it->first,
-                    list.insert(
-                        list.end(),
-                        std::make_pair(it->first, it->second))));
+        for (const auto &entry : other.list) {
+            table.insert({entry.first, list.insert(list.end(), entry)});
         }
     }
+
+    /// @brief Move constructor.
+    /// @param other a reference to the map to move.
+    ordered_map_t(ordered_map_t &&other) noexcept
+        : list(std::move(other.list))
+        , table(std::move(other.table))
+    {
+        // Nothing to do.
+    }
+
+    /// @brief Move assignment operator.
+    /// @param other a reference to the map to move.
+    /// @return a reference to the current map.
+    auto operator=(ordered_map_t &&other) noexcept -> ordered_map_t &
+    {
+        if (this != &other) {
+            this->clear();
+            list  = std::move(other.list);
+            table = std::move(other.table);
+        }
+        return *this;
+    }
+
+    /// @brief Destructor.
+    ~ordered_map_t() = default;
 
     /// @brief Clears the content of the map.
     void clear()
@@ -68,7 +96,9 @@ public:
     }
 
     /// @brief Returns the number of element in the map.
-    std::size_t size() const
+    /// @return the number of elements.
+    [[nodiscard]]
+    auto size() const -> std::size_t
     {
         return list.size();
     }
@@ -77,13 +107,13 @@ public:
     /// @param key the value identifier.
     /// @param value the actual value.
     /// @return the iterator to the newly inserted/updated element in the map.
-    iterator set(const Key &key, const Value &value)
+    auto set(const Key &key, const Value &value) -> iterator
     {
         // First, we search for the element inside the table.
         table_iterator it_table = table.find(key);
         // Create the return iterator.
         iterator it_list;
-        // Now, if the element is not in the table, we need to add it.
+        // Now, if the element is not in the table, we need to add itr.
         if (it_table == table.end()) {
             // First, we add the element to the list and get the pointer to the
             // newly inserted element.
@@ -93,7 +123,7 @@ public:
             table.insert(std::make_pair(key, it_list));
         } else {
             // First, we get the list iterator.
-            it_list = it_table->second;
+            it_list         = it_table->second;
             // Then, we update the associated value.
             it_list->second = value;
         }
@@ -101,34 +131,26 @@ public:
     }
 
     /// @brief Returns an iterator the beginning of the list.
-    iterator begin()
-    {
-        return list.begin();
-    }
+    /// @return an iterator to the beginning of the list.
+    auto begin() -> iterator { return list.begin(); }
 
     /// @brief Returns a const iterator the beginning of the list.
-    const_iterator begin() const
-    {
-        return list.begin();
-    }
+    /// @return an iterator to the beginning of the list.
+    auto begin() const -> const_iterator { return list.begin(); }
 
     /// @brief Returns an iterator the end of the list.
-    iterator end()
-    {
-        return list.end();
-    }
+    /// @return an iterator to the end of the list.
+    auto end() -> iterator { return list.end(); }
 
     /// @brief Returns a const iterator the end of the list.
-    const_iterator end() const
-    {
-        return list.end();
-    }
+    /// @return an iterator to the end of the list.
+    auto end() const -> const_iterator { return list.end(); }
 
     /// @brief Erases the elment from the list, and returns an iteator to the
     /// same position in the list (i.e., the elment after the one removed).
     /// @param key the key of the element to remove.
     /// @return an iterator to the same position in the list.
-    iterator erase(const Key &key)
+    auto erase(const Key &key) -> iterator
     {
         table_iterator it_table = table.find(key);
         if (it_table == table.end()) {
@@ -145,7 +167,7 @@ public:
     /// same position in the list (i.e., the elment after the one removed).
     /// @param it_list the iterator of the element to remove.
     /// @return an iterator to the same position in the list.
-    iterator erase(iterator it_list)
+    auto erase(iterator it_list) -> iterator
     {
         table_iterator it_table = table.find(it_list->first);
         if (it_table == table.end()) {
@@ -160,53 +182,50 @@ public:
     /// @brief Returns an iterator to the element in the given position.
     /// @param position the position of the element to retrieve.
     /// @return an iterator to the element, or the end of the list if not found.
-    iterator at(std::size_t position)
+    auto at(std::size_t position) -> iterator
     {
-        iterator it = list.begin();
-        for (std::size_t i = 0; (i < position) && (it != list.end()); ++i, ++it) {}
-        return it;
+        iterator itr = list.begin();
+        std::advance(itr, std::min(position, list.size()));
+        return itr;
     }
 
     /// @brief Returns an iterator to the element in the given position.
     /// @param position the position of the element to retrieve.
     /// @return an iterator to the element, or the end of the list if not found.
-    const_iterator at(std::size_t position) const
+    auto at(std::size_t position) const -> const_iterator
     {
-        const_iterator it = list.begin();
-        for (std::size_t i = 0; (i < position) && (it != list.end()); ++i, ++it) {}
-        return it;
+        const_iterator itr = list.begin();
+        std::advance(itr, std::min(position, list.size()));
+        return itr;
     }
 
     /// @brief Returns an iterator to the element associated with the given key.
     /// @param key the key of the element to search for.
     /// @return an iterator to the element, or the end of the list if not found.
-    iterator find(const Key &key)
+    auto find(const Key &key) -> iterator
     {
-        table_iterator it = table.find(key);
-        if (it == table.end()) {
+        table_iterator itr = table.find(key);
+        if (itr == table.end()) {
             return list.end();
         }
-        return it->second;
+        return itr->second;
     }
 
     /// @brief Returns an iterator to the element associated with the given key.
     /// @param key the key of the element to search for.
     /// @return an iterator to the element, or the end of the list if not found.
-    const_iterator find(const Key &key) const
+    auto find(const Key &key) const -> const_iterator
     {
-        table_const_iterator it = table.find(key);
-        if (it == table.end()) {
+        table_const_iterator itr = table.find(key);
+        if (itr == table.end()) {
             return list.end();
         }
-        return it->second;
+        return itr->second;
     }
 
     /// @brief Sorts the internal list.
     /// @param fun the sorting function.
-    inline void sort(const sort_function_t &fun)
-    {
-        list.sort(fun);
-    }
+    void sort(const sort_function_t &fun) { list.sort(fun); }
 
     /// @brief Assign operator.
     /// @param other a reference to the map to copy.
@@ -214,25 +233,23 @@ public:
     /// the copy of the iterators contained inside the `std::map`. That is why,
     /// here I copy each individual element of the list and store the iterator,
     /// again.
-    ordered_map_t &operator=(const ordered_map_t &other)
+    /// @return a reference to the current map.
+    auto operator=(const ordered_map_t &other) -> ordered_map_t &
     {
-        this->clear();
-        for (const_iterator it = other.list.begin(); it != other.list.end(); ++it) {
-            table.insert(
-                std::make_pair(
-                    it->first,
-                    list.insert(
-                        list.end(),
-                        std::make_pair(it->first, it->second))));
+        if (this != &other) {
+            this->clear();
+            for (const auto &entry : other.list) {
+                table.insert({entry.first, list.insert(list.end(), entry)});
+            }
         }
         return *this;
     }
 
 private:
     /// @brief Type of the map.
-    typedef std::map<Key, iterator> table_t;
-    typedef typename table_t::iterator table_iterator;
-    typedef typename table_t::const_iterator table_const_iterator;
+    using table_t              = std::map<Key, iterator>;
+    using table_iterator       = typename table_t::iterator;
+    using table_const_iterator = typename table_t::const_iterator;
     /// @brief The list containing the actual data.
     list_t list;
     /// @brief A table for easy access to the data by using a key.

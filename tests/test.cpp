@@ -1,10 +1,10 @@
 /// @file test.cpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief Simple test set for the ordered map.
-/// 
+///
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-/// 
+///
 
 #include <iostream>
 #include <sstream>
@@ -12,41 +12,38 @@
 
 #include "ordered_map/ordered_map.hpp"
 
-typedef ordered_map::ordered_map_t<std::string, int> Table;
+using Table = ordered_map::ordered_map_t<std::string, int>;
 
-inline int get_choice(char *argument)
+inline auto get_choice(char *argument) -> int
 {
     std::stringstream ss;
     ss << argument;
-    int choice;
+    int choice = 0;
     ss >> choice;
     return choice;
 }
 
-inline bool check(const Table &table, const std::string &key, int value)
+inline auto check(const Table &table, const std::string &key, int value) -> bool
 {
-    Table::const_iterator it = table.find(key);
+    auto it = table.find(key);
     if (it == table.end()) {
         return false;
     }
     return it->second == value;
 }
 
-inline bool check(const Table &table, std::size_t position, int value)
+inline auto check(const Table &table, std::size_t position, int value) -> bool
 {
-    Table::const_iterator it = table.at(position);
+    auto it = table.at(position);
     if (it == table.end()) {
         return false;
     }
     return it->second == value;
 }
 
-bool compare(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
-{
-    return lhs.first < rhs.first;
-}
+auto compare(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs) -> bool { return lhs.first < rhs.first; }
 
-int run_test_0()
+auto run_test_0() -> int
 {
     // Create the table.
     Table table;
@@ -70,7 +67,7 @@ int run_test_0()
     return 0;
 }
 
-int run_test_1()
+auto run_test_1() -> int
 {
     // Create the table.
     Table table;
@@ -96,7 +93,7 @@ int run_test_1()
     return 0;
 }
 
-int run_test_2()
+auto run_test_2() -> int
 {
     // Create the table.
     Table table;
@@ -122,7 +119,7 @@ int run_test_2()
     return 0;
 }
 
-int run_test_3()
+auto run_test_3() -> int
 {
     // Create the table.
     Table table;
@@ -149,7 +146,7 @@ int run_test_3()
     return 0;
 }
 
-int run_test_4()
+auto run_test_4() -> int
 {
     // Create the table.
     Table table;
@@ -187,7 +184,7 @@ int run_test_4()
     return 0;
 }
 
-int main(int argc, char *argv[])
+auto main(int argc, char *argv[]) -> int
 {
     if (argc == 2) {
         int choice = get_choice(argv[1]);

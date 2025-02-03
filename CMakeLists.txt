@@ -44,6 +44,8 @@ mark_as_advanced(FORCE
 
 find_package(Doxygen)
 
+find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+
 # -----------------------------------------------------------------------------
 # LIBRARY
 # -----------------------------------------------------------------------------
@@ -112,29 +114,73 @@ if(BUILD_TESTS)
 endif()
 
 # -----------------------------------------------------------------------------
+# CODE ANALYSIS
+# -----------------------------------------------------------------------------
+
+if(CLANG_TIDY_EXE)
+    file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SOURCE_DIR}/include/**/*.hpp")
+    file(GLOB_RECURSE PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/**/*.cpp")
+    add_custom_target(
+        ordered_map_clang_tidy
+        COMMAND ${CLANG_TIDY_EXE}
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS}
+        ${PROJECT_SOURCES}
+        COMMENT "Running clang-tidy"
+        VERBATIM
+    )
+    add_custom_target(
+        ordered_map_clang_tidy_fix
+        COMMAND ${CLANG_TIDY_EXE}
+        --fix
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS}
+        ${PROJECT_SOURCES}
+        COMMENT "Running clang-tidy"
+        VERBATIM
+    )
+endif()
+
+# -----------------------------------------------------------------------------
 # DOCUMENTATION
 # -----------------------------------------------------------------------------
 
 if(DOXYGEN_FOUND)
-    # = FETCH DOXYGEN-AWESOME =================================================
-    # Record the options that describe how to populate the specified content.
+    # FetchContent: Doxygen Awesome CSS
     FetchContent_Declare(doxygenawesome
         GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css
         GIT_TAG main
     )
-    # Retrieve the properties related to the content.
     FetchContent_MakeAvailable(doxygenawesome)
-    # Hide fetchcontent variables, otherwise with ccmake it's a mess.
+
+    # Hide FetchContent variables to avoid clutter in ccmake.
     mark_as_advanced(FORCE
         FETCHCONTENT_UPDATES_DISCONNECTED_DOXYGENAWESOME
         FETCHCONTENT_SOURCE_DIR_DOXYGENAWESOME
     )
-    # = CUSTOMIZATION =========================================================
-    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
-    set(DOXYGEN_PROJECT_NAME ordered_map)
+
+    # Read the file with the version.
+    file(READ ${PROJECT_SOURCE_DIR}/include/ordered_map/ordered_map.hpp version_file)
+    # Extract the version.
+    string(REGEX MATCH "ORDERED_MAP_MAJOR_VERSION ([0-9]*)" _ ${version_file})
+    set(PROJECT_MAJOR_VERSION ${CMAKE_MATCH_1})
+    string(REGEX MATCH "ORDERED_MAP_MINOR_VERSION ([0-9]*)" _ ${version_file})
+    set(PROJECT_MINOR_VERSION ${CMAKE_MATCH_1})
+    string(REGEX MATCH "ORDERED_MAP_MICRO_VERSION ([0-9]*)" _ ${version_file})
+    set(PROJECT_MICRO_VERSION ${CMAKE_MATCH_1})
+
+    # Customization: Doxygen Configuration
+    set(DOXYGEN_WARN_FORMAT "$file:$line:1: $text")
+    set(DOXYGEN_PROJECT_NAME "Ordered Map")
+    set(DOXYGEN_PROJECT_BRIEF "An ordered map for C++")
+    set(DOXYGEN_PROJECT_NUMBER "${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_MICRO_VERSION}")
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
+    set(DOXYGEN_GENERATE_LATEX NO) # Disable LaTeX if not needed
+    set(DOXYGEN_GENERATE_MAN NO)   # Disable man pages if not needed
+
+    # Styling and UX enhancements using Doxygen Awesome
     set(DOXYGEN_HTML_HEADER ${doxygenawesome_SOURCE_DIR}/doxygen-custom/header.html)
     set(DOXYGEN_HTML_EXTRA_STYLESHEET ${doxygenawesome_SOURCE_DIR}/doxygen-awesome.css)
     set(DOXYGEN_HTML_EXTRA_FILES
@@ -142,10 +188,25 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-paragraph-link.js
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
+
+    # Set stricter warnings for better documentation quality
+    set(DOXYGEN_WARN_IF_UNDOCUMENTED YES)
+    set(DOXYGEN_WARN_IF_DOC_ERROR YES)
+    set(DOXYGEN_WARN_NO_PARAMDOC YES)
+    set(DOXYGEN_WARN_AS_ERROR YES) # Treat warnings as errors for CI
+
+    # Exclude certain files or directories from documentation (if needed)
+    set(DOXYGEN_EXCLUDE_PATTERNS "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/examples/*")
+
+    # Add Doxygen documentation target.
+    file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SOURCE_DIR}/include/**/*.hpp")
+    file(GLOB_RECURSE PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/**/*.cpp")
     doxygen_add_docs(
         ordered_map_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/LICENSE.md
-        ${PROJECT_SOURCE_DIR}/include/ordered_map/ordered_map.hpp
+        ${PROJECT_HEADERS}
+        ${PROJECT_SOURCES}
+        COMMENT "Generating Doxygen documentation for the library"
     )
 endif()

@@ -1,37 +1,38 @@
 /// @file example.cpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief A couple of examples for the ordered map.
-/// 
+///
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-/// 
+///
 
 #include <iostream>
 #include <sstream>
 
 #include "ordered_map/ordered_map.hpp"
 
-typedef ordered_map::ordered_map_t<std::string, int> Table;
+using Table = ordered_map::ordered_map_t<std::string, int>;
 
 inline void print(const Table &table)
 {
     std::cout << "{ ";
-    for (Table::const_iterator it = table.begin(); it != table.end(); ++it)
-        std::cout << "[" << it->first << "](" << it->second << ") ";
+    for (const auto &it : table) {
+        std::cout << "[" << it.first << "](" << it.second << ") ";
+    }
     std::cout << "}\n";
 }
 
-bool compare_gt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
+auto compare_gt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs) -> bool
 {
     return lhs.first > rhs.first;
 }
 
-bool compare_lt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs)
+auto compare_lt(const Table::list_entry_t &lhs, const Table::list_entry_t &rhs) -> bool
 {
     return lhs.first < rhs.first;
 }
 
-int main(int, char *[])
+auto main(int /*unused*/, char * /*unused*/[]) -> int
 {
     Table table;
 
@@ -52,8 +53,9 @@ int main(int, char *[])
 
     // Erase using iterator.
     Table::iterator it_erase;
-    if ((it_erase = table.find("d")) != table.end())
+    if ((it_erase = table.find("d")) != table.end()) {
         table.erase(it_erase);
+    }
     print(table);
 
     // Sort the value but preserve the internal mechanisms, i.e., the key value
