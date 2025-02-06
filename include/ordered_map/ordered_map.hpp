@@ -8,11 +8,10 @@
 
 #pragma once
 
-#include <cstdint>
 #include <list>
 #include <map>
 
-enum : std::uint8_t {
+enum : unsigned char {
     ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
     ORDERED_MAP_MINOR_VERSION = 0, ///< Minor version of the library.
     ORDERED_MAP_MICRO_VERSION = 4, ///< Micro version of the library.
@@ -97,10 +96,7 @@ public:
 
     /// @brief Returns the number of element in the map.
     /// @return the number of elements.
-    auto size() const -> std::size_t
-    {
-        return list.size();
-    }
+    auto size() const -> std::size_t { return list.size(); }
 
     /// @brief Sets/updates the `<key,value>` pair inside the map.
     /// @param key the value identifier.
