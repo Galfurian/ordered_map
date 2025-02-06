@@ -15,12 +15,23 @@ Checks:
 - readability-*
 - misc-braces-around-statements
 - -llvm-header-guard
-- -altera-unroll-loops
+- -modernize-return-braced-init-list
 - -modernize-use-nodiscard
+- -modernize-type-traits
+- -bugprone-return-const-ref-from-parameter
+- -bugprone-easily-swappable-parameters
+- -altera-unroll-loops
+- -altera-struct-pack-align
+- -altera-id-dependent-backward-branch
+- -readability-non-const-parameter
+- -readability-magic-numbers
+- -readability-identifier-length
+- -google-runtime-int
+- -cppcoreguidelines-avoid-non-const-global-variables
+- -cppcoreguidelines-avoid-magic-numbers
 
 WarningsAsErrors: ''
 HeaderFileExtensions:
-- ''
 - h
 - hh
 - hpp
