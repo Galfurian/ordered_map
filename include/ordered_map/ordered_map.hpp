@@ -14,7 +14,7 @@
 enum : unsigned char {
     ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
     ORDERED_MAP_MINOR_VERSION = 0, ///< Minor version of the library.
-    ORDERED_MAP_MICRO_VERSION = 4, ///< Micro version of the library.
+    ORDERED_MAP_MICRO_VERSION = 5, ///< Micro version of the library.
 };
 
 /// @brief This namespace contains the main table class.
