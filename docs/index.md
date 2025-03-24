@@ -5,28 +5,45 @@
 [![MacOS](https://github.com/Galfurian/ordered_map/actions/workflows/macos.yml/badge.svg)](https://github.com/Galfurian/ordered_map/actions/workflows/macos.yml)
 [![Documentation](https://github.com/Galfurian/ordered_map/actions/workflows/documentation.yml/badge.svg)](https://github.com/Galfurian/ordered_map/actions/workflows/documentation.yml)
 
-A c++ map that can preserves the order of insertion.
+A C++ container that behaves like a map but **preserves the order of insertion** and offers **efficient key lookup**.
 
 ## Overview
 
-The **`ordered_map`** library provides an `ordered_map_t` class template that
-wraps a `std::list` container, while leveraging a `std::map` for efficient
-access to its elements by key. This data structure maintains the order of
-insertion and provides constant-time key-based access.
+The **`ordered_map`** library provides an `ordered_map_t<Key, Value>` class template that combines:
+
+- A `std::list` to preserve insertion order.
+- A `std::map<Key, iterator>` for efficient key lookup.
+
+It supports **unique keys**, **stable iterators**, and **ordered traversal**.
 
 ## Features
 
-- **Ordered Storage**: Maintains the order in which elements are inserted.
-- **Fast Key-Based Lookup**: Uses `std::map` to enable efficient element access.
-- **Customizable Sorting**: Supports sorting the internal list with user-defined
-  comparison functions.
-- **Flexible API**: Provides iterators for traversal and modification of the
-  stored elements.
+- **Insertion-order iteration**
+- **Efficient key lookup** via internal `std::map`
+- **Stable iterators** — safe during most operations
+- **Custom sorting** with user-defined comparators
+- **Rich API** including:
+  - `set`, `emplace`, `erase`, `find`, `count`, `has`
+  - `equal_range`, `merge`, `index_of`
+  - `front`, `back`, `keys`, `values`, `to_vector`
+- **Full iterator support**: `begin`, `end`, `rbegin`, `rend`
+
+## Summary of Trade-Offs
+
+| Feature                   | std::map | std::unordered_map  | `ordered_map_t`                 |
+|---------------------------|----------|---------------------|---------------------------------|
+| Maintains key order       | V        | X                   | Optional via `sort()`           |
+| Maintains insertion order | X        | X                   | V                               |
+| Allows duplicate keys     | X        | X                   | X (use `ordered_multimap_t`)    |
+| Lookup time               | O(log N) | O(1) avg            | O(log N) via internal map       |
+| Insert/remove performance | O(log N) | O(1) avg            | O(1) for list, O(log N) for map |
+| Iterator stability        | X        | X                   | V                               |
+| Custom sorting            | X        | X                   | V                               |
 
 ## Requirements
 
 - **C++11** or later.
-- Standard C++ libraries: `<list>` and `<map>`.
+- Standard C++ libraries (`<list>`, `<map>`, `<utility>`, etc.)
 
 ## Installation
 
@@ -43,42 +60,45 @@ Ensure the `ordered_map.hpp` file is in your project's include path.
 Below is an example showcasing basic usage of `ordered_map_t`:
 
 ```c++
-#include "ordered_map.hpp" #include <iostream>
+#include "ordered_map.hpp"
+#include <iostream>
 
-int main() {
-    ordered_map::ordered_map_t<int, std::string> my_map;
-    // Add elements
-    my_map.set(1, "One");
-    my_map.set(2, "Two");
-    my_map.set(3, "Three");
+int main()
+{
+    ordered_map::ordered_map_t<int, std::string> omap;
 
-    // Iterate and print
-    for (auto it = my_map.begin(); it != my_map.end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
-    }
-    std::cout << std::endl;
+    omap.set(1, "one");
+    omap.set(2, "two");
+    omap.set(3, "three");
 
-    // Find an element
-    auto it = my_map.find(2);
-    if (it != my_map.end()) {
-        std::cout << "Found: " << it->first << " -> " << it->second << std::endl;
+    // Iteration preserves insertion order.
+    for (const auto &entry : omap)
+    {
+        std::cout << entry.first << ": " << entry.second << '\n';
     }
 
-    // Erase an element
-    my_map.erase(2);
+    // Overwrite a value.
+    omap.set(2, "dos");
 
-    return 0;
+    // Lookup.
+    auto it = omap.find(2);
+    if (it != omap.end())
+    {
+        std::cout << "Found: " << it->first << " -> " << it->second << '\n';
+    }
+
+    // Merge another map.
+    ordered_map::ordered_map_t<int, std::string> other;
+    other.set(4, "four");
+    omap.merge(std::move(other));
+
+    // Convert to vector.
+    auto vec = omap.to_vector();
+    for (const auto &[key, val] : vec)
+    {
+        std::cout << key << " = " << val << '\n';
+    }
 }
-```
-
-Output:
-
-```bash
-1: One
-2: Two
-3: Three
-
-Found: 2 -> Two
 ```
 
 ## License
