@@ -260,7 +260,10 @@ public:
     /// The behavior is undefined if the iterator is not from this container.
     /// @param it The iterator whose position to determine.
     /// @return The zero-based index of the iterator.
-    auto index_of(const const_iterator &it) const -> std::size_t { return std::distance(list.begin(), it); }
+    auto index_of(const const_iterator &it) const -> std::size_t
+    {
+        return static_cast<std::size_t>(std::distance(list.begin(), it));
+    }
 
     /// @brief Returns an iterator to the element in the given position.
     /// @param position the position of the element to retrieve.
