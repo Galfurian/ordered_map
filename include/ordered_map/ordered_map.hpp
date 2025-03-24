@@ -1,15 +1,14 @@
 /// @file ordered_map.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief The ordered map class.
-///
 /// @copyright (c) 2024 This file is distributed under the MIT License.
 /// See LICENSE.md for details.
-///
 
 #pragma once
 
 #include <list>
 #include <map>
+#include <vector>
 
 enum : unsigned char {
     ORDERED_MAP_MAJOR_VERSION = 1, ///< Major version of the library.
@@ -24,8 +23,7 @@ namespace ordered_map
 /// @brief A wrapper for a `std::list` container, which uses a `std::map` for accessing the data.
 /// @tparam Key the type of the key for building the `std::map`.
 /// @tparam Value the value stored inside the `std::list`.
-template <typename Key, typename Value>
-class ordered_map_t
+template <typename Key, typename Value> class ordered_map_t
 {
 public:
     /// @brief This stores the key->value association.
@@ -98,6 +96,10 @@ public:
     /// @return the number of elements.
     auto size() const -> std::size_t { return list.size(); }
 
+    /// @brief Checks whether the map is empty.
+    /// @return True if empty, false otherwise.
+    auto empty() const -> bool { return list.empty(); }
+
     /// @brief Sets/updates the `<key,value>` pair inside the map.
     /// @param key the value identifier.
     /// @param value the actual value.
@@ -125,6 +127,29 @@ public:
         return it_list;
     }
 
+    /// @brief Constructs a value in-place at the end of the map with the given key.
+    /// @details If the key already exists, its value is updated. If not,
+    /// a new entry is emplaced at the end of the list.
+    /// @tparam Args Types of arguments to construct a `Value`.
+    /// @param key The key associated with the new value.
+    /// @param args Arguments forwarded to construct the `Value`.
+    /// @return An iterator to the inserted or updated element.
+    template <typename... Args> auto emplace(const Key &key, Args &&...args) -> iterator
+    {
+        table_iterator it_table = table.find(key);
+        iterator it_list;
+        if (it_table == table.end()) {
+            it_list = list.emplace(
+                list.end(), std::piecewise_construct, std::forward_as_tuple(key),
+                std::forward_as_tuple(std::forward<Args>(args)...));
+            table.insert(std::make_pair(key, it_list));
+        } else {
+            it_list         = it_table->second;
+            it_list->second = Value(std::forward<Args>(args)...);
+        }
+        return it_list;
+    }
+
     /// @brief Returns an iterator the beginning of the list.
     /// @return an iterator to the beginning of the list.
     auto begin() -> iterator { return list.begin(); }
@@ -140,6 +165,22 @@ public:
     /// @brief Returns a const iterator the end of the list.
     /// @return an iterator to the end of the list.
     auto end() const -> const_iterator { return list.end(); }
+
+    /// @brief Returns a reverse iterator to the last element in the list.
+    /// @return A reverse iterator to the last element.
+    auto rbegin() -> typename list_t::reverse_iterator { return list.rbegin(); }
+
+    /// @brief Returns a const reverse iterator to the last element in the list.
+    /// @return A const reverse iterator to the last element.
+    auto rbegin() const -> typename list_t::const_reverse_iterator { return list.rbegin(); }
+
+    /// @brief Returns a reverse iterator to the position before the first element.
+    /// @return A reverse iterator to the position before the first.
+    auto rend() -> typename list_t::reverse_iterator { return list.rend(); }
+
+    /// @brief Returns a const reverse iterator to the position before the first element.
+    /// @return A const reverse iterator to the position before the first.
+    auto rend() const -> typename list_t::const_reverse_iterator { return list.rend(); }
 
     /// @brief Erases the elment from the list, and returns an iteator to the
     /// same position in the list (i.e., the elment after the one removed).
@@ -173,6 +214,53 @@ public:
         table.erase(it_table);
         return it_list;
     }
+
+    /// @brief Returns a vector of all keys in insertion order.
+    /// @return A vector containing the keys.
+    auto keys() const -> std::vector<Key>
+    {
+        std::vector<Key> result;
+        result.reserve(list.size());
+        for (const auto &entry : list) {
+            result.push_back(entry.first);
+        }
+        return result;
+    }
+
+    /// @brief Returns a vector of all values in insertion order.
+    /// @return A vector containing the values.
+    auto values() const -> std::vector<Value>
+    {
+        std::vector<Value> result;
+        result.reserve(list.size());
+        for (const auto &entry : list) {
+            result.push_back(entry.second);
+        }
+        return result;
+    }
+
+    /// @brief Returns an iterator to the first element in the list.
+    /// @return An iterator to the first element.
+    auto front() -> iterator { return list.begin(); }
+
+    /// @brief Returns a const iterator to the first element in the list.
+    /// @return A const iterator to the first element.
+    auto front() const -> const_iterator { return list.begin(); }
+
+    /// @brief Returns an iterator to the last element in the list.
+    /// @return An iterator to the last element.
+    auto back() -> iterator { return std::prev(list.end()); }
+
+    /// @brief Returns a const iterator to the last element in the list.
+    /// @return A const iterator to the last element.
+    auto back() const -> const_iterator { return std::prev(list.end()); }
+
+    /// @brief Returns the index of the given iterator in the internal list.
+    /// @details This computes the distance between `begin()` and the provided iterator.
+    /// The behavior is undefined if the iterator is not from this container.
+    /// @param it The iterator whose position to determine.
+    /// @return The zero-based index of the iterator.
+    auto index_of(const const_iterator &it) const -> std::size_t { return std::distance(list.begin(), it); }
 
     /// @brief Returns an iterator to the element in the given position.
     /// @param position the position of the element to retrieve.
@@ -218,9 +306,36 @@ public:
         return itr->second;
     }
 
+    /// @brief Checks whether an element with the given key exists.
+    /// @details This function is a shorthand for `find(key) != end()`.
+    /// It improves readability when checking for key existence.
+    /// @param key The key to check.
+    /// @return True if the key exists, false otherwise.
+    auto has(const Key &key) const -> bool { return table.find(key) != table.end(); }
+
     /// @brief Sorts the internal list.
     /// @param fun the sorting function.
     void sort(const sort_function_t &fun) { list.sort(fun); }
+
+    /// @brief Counts how many elements exist with the given key.
+    /// @details Since this is a map (not a multimap), this will return either 0 or 1.
+    /// @param key The key to check.
+    /// @return 1 if the key exists, 0 otherwise.
+    auto count(const Key &key) const -> std::size_t { return table.count(key); }
+
+    /// @brief Returns all key-value pairs as a vector in insertion order.
+    /// @return A vector of key-value pairs.
+    auto to_vector() const -> std::vector<list_entry_t> { return std::vector<list_entry_t>(list.begin(), list.end()); }
+
+    /// @brief Merges contents from another map, overwriting any existing keys.
+    /// @param other The other map to merge from.
+    void merge(ordered_map_t &&other)
+    {
+        for (auto &entry : other.list) {
+            set(std::move(entry.first), std::move(entry.second));
+        }
+        other.clear();
+    }
 
     /// @brief Assign operator.
     /// @param other a reference to the map to copy.

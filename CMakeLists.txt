@@ -133,15 +133,11 @@ endif()
 if(BUILD_TESTS)
     # CMake has support for adding tests to a project.
     enable_testing()
+
     # Add the test.
     add_executable(ordered_map_test ${PROJECT_SOURCE_DIR}/tests/test.cpp)
-    add_test(NAME ordered_map_test_run_0 COMMAND ordered_map_test 0)
-    add_test(NAME ordered_map_test_run_1 COMMAND ordered_map_test 1)
-    add_test(NAME ordered_map_test_run_2 COMMAND ordered_map_test 2)
-    add_test(NAME ordered_map_test_run_3 COMMAND ordered_map_test 3)
-    add_test(NAME ordered_map_test_run_4 COMMAND ordered_map_test 4)
-    # Liking for the test.
     target_link_libraries(ordered_map_test ordered_map)
+    add_test(NAME ordered_map_test_run COMMAND ordered_map_test)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -149,25 +145,35 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(CLANG_TIDY_EXE)
-    file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SOURCE_DIR}/include/**/*.hpp")
-    file(GLOB_RECURSE PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/**/*.cpp")
+    file(GLOB_RECURSE ALL_PROJECT_FILES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/**/*.c"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/*.c"
+    )
     add_custom_target(
-        ordered_map_clang_tidy
+        ${PROJECT_NAME}_clang_tidy
         COMMAND ${CLANG_TIDY_EXE}
         --p=${CMAKE_BINARY_DIR}
-        ${PROJECT_HEADERS}
-        ${PROJECT_SOURCES}
+        ${ALL_PROJECT_FILES}
         COMMENT "Running clang-tidy"
         VERBATIM
     )
     add_custom_target(
-        ordered_map_clang_tidy_fix
+        ${PROJECT_NAME}_clang_tidy_fix
         COMMAND ${CLANG_TIDY_EXE}
-        --fix
+        --fix --fix-errors
         --p=${CMAKE_BINARY_DIR}
-        ${PROJECT_HEADERS}
-        ${PROJECT_SOURCES}
-        COMMENT "Running clang-tidy"
+        ${ALL_PROJECT_FILES}
+        COMMENT "Running clang-tidy-fix"
         VERBATIM
     )
 endif()
@@ -230,14 +236,26 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_EXCLUDE_PATTERNS "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/examples/*")
 
     # Add Doxygen documentation target.
-    file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SOURCE_DIR}/include/**/*.hpp")
-    file(GLOB_RECURSE PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/**/*.cpp")
+    file(GLOB_RECURSE ALL_PROJECT_FILES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/**/*.c"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/*.c"
+    )
+
     doxygen_add_docs(
-        ordered_map_documentation
+        ${PROJECT_NAME}_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/LICENSE.md
-        ${PROJECT_HEADERS}
-        ${PROJECT_SOURCES}
+        ${ALL_PROJECT_FILES}
         COMMENT "Generating Doxygen documentation for the library"
     )
 endif()
